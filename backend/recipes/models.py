@@ -62,7 +62,6 @@ class Recipe(models.Model):
         verbose_name='Время приготовления'
     )
     short_link = models.SlugField(unique=True, editable=False)
-    
 
     def save(self, *args, **kwargs):
         if not self.short_link:

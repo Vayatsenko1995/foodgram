@@ -16,10 +16,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from api.views import short_link
+from api.views import RecipeViewSet
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('<str:short_link>/', short_link, name='short_link'),
+    path(
+        's/<str:short_link>/',
+        RecipeViewSet.as_view({'get': 'recipe_by_short_link'}),
+        name='recipe_by_short_link'
+    ),
 ]

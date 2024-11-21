@@ -7,8 +7,9 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     CustomUserViewSet, IngredientViewSet,
     TagViewSet, RecipeViewSet,
-    short_link,
 )
+
+app_name = 'api'
 
 router = DefaultRouter()
 
@@ -22,8 +23,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
-
-    path('<str:short_link/', short_link, name='short_link'),
 ]
 
 if settings.DEBUG:

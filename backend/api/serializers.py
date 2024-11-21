@@ -1,5 +1,5 @@
 from django.core.validators import MinValueValidator
-from rest_framework import exceptions, serializers
+from rest_framework import exceptions, serializers, status
 from djoser.serializers import UserSerializer
 
 from users.models import CustomUser, Follow

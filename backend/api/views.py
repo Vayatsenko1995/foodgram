@@ -251,17 +251,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """View функция, возвращающая короткую постоянную ссылку на рецепт."""
         recipe = get_object_or_404(Recipe, pk=pk)
 
-        short_link = f"http://localhost/{recipe.short_link}/"
-        # short_link = f"http://127.0.0.1:8000/{recipe.short_link}/"
+        short_link = request.build_absolute_uri(
+            reverse('recipe_by_short_link', args=(recipe.short_link,))
+        )
+
         return JsonResponse({'short-link': short_link})
 
+    def recipe_by_short_link(self, request, short_link=None):
+        """View функция, для открытия информации о рецепте по короткой ссылке."""
+        recipe_id = get_object_or_404(
+            Recipe, short_link=short_link
+        ).id
 
-def short_link(request, short_link=None):
-    """View функция, для открытия информации о рецепте по короткой ссылке."""
-    recipe_id = get_object_or_404(
-        Recipe, short_link=short_link
-    ).id
-    recipe_url = f"http://localhost/api/recipes/{recipe_id}/"
-    # recipe_url = f"http://127.0.0.1:8000/api/recipes/{recipe_id}/"
+        url = reverse('api:recipes-detail', kwargs={'pk': recipe_id})
+        original_url = request.build_absolute_uri(url)
 
-    return redirect(recipe_url)
+        return redirect(original_url)
