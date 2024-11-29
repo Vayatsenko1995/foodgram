@@ -1,15 +1,24 @@
 version: '3.3'
 
+volumes:
+  static:
+  media:
+
 services:
   backend:
     container_name: foodgram_back
     build: ../backend
+    volumes:
+      - static:/backend_static
+      - media:/app/media
 
   frontend:
     container_name: foodgram-front
     build: ../frontend
+    command: cp -r /app/build/. /frontend_static/
     volumes:
       - ../frontend/:/app/result_build/
+
   nginx:
     container_name: foodgram-proxyp
     image: nginx:1.25.4-alpine

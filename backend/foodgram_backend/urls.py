@@ -24,7 +24,7 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path(
         's/<str:short_link>/',
-        RecipeViewSet.as_view({'get': 'recipe_by_short_link'}),
+        RecipeViewSet.as_view({'get': 'retrieve_by_short_link'}),
         name='recipe_by_short_link'
     ),
 ]

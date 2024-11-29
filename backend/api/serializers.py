@@ -1,11 +1,13 @@
 from django.core.validators import MinValueValidator
-from rest_framework import exceptions, serializers, status
+from rest_framework import exceptions, serializers
+from rest_framework.reverse import reverse
 from djoser.serializers import UserSerializer
 
 from users.models import CustomUser, Follow
 from recipes.models import (
     Recipe, RecipeIngredient, Ingredient,
-    Tag, Favorite, ShoppingCart
+    Tag, Favorite, ShoppingCart,
+    RecipeShortLink
 )
 from .utils import Base64ImageField
 
@@ -321,6 +323,7 @@ class FollowSerializer(serializers.ModelSerializer):
         )
         return serializer.data
 
+
 class AvatarSerializer(UserSerializer):
     """Сериализатор для аватара пользователя."""
 
@@ -329,3 +332,26 @@ class AvatarSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         model = CustomUser
         fields = ('avatar',)
+
+
+class ShortLinkSerializer(serializers.ModelSerializer):
+    """Сериализатор коротких ссылок"""
+
+    class Meta:
+        model = RecipeShortLink
+        fields = ('original_url',)
+        write_only_fields = ('original_url',)
+
+    def get_short_link(self, obj):
+        request = self.context.get('request')
+        return request.build_absolute_uri(
+            reverse('recipe_by_short_link', args=[obj.short_link])
+        )
+
+    def create(self, validated_data):
+
+        instance, _ = RecipeShortLink.objects.get_or_create(**validated_data)
+        return instance
+
+    def to_representation(self, instance):
+        return {'short-link': self.get_short_link(instance)}

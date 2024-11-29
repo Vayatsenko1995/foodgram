@@ -1,6 +1,7 @@
 from datetime import datetime
+import uuid
 
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect
 from django.core.exceptions import PermissionDenied
@@ -15,10 +16,11 @@ from django_filters import rest_framework as rest_filters
 
 from users.models import CustomUser, Follow
 from recipes.models import (
-    Ingredient, Tag, Recipe, ShoppingCart, Favorite, RecipeIngredient
+    Ingredient, Tag, Recipe, ShoppingCart, Favorite, RecipeIngredient,
+    RecipeShortLink
 )
 from .serializers import (
-    RecipeSerializer,
+    RecipeSerializer, ShortLinkSerializer,
     RecipePostUpdateSerializer,
     IngredientSerializer, TagSerializer,
     ShoppingCartSerializer,
@@ -247,23 +249,37 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         methods=['get'], detail=True, url_path='get-link', url_name='get_link'
     )
-    def get_link_short(self, request, pk=None):
-        """View функция, возвращающая короткую постоянную ссылку на рецепт."""
-        recipe = get_object_or_404(Recipe, pk=pk)
+    def get_link(self, request, pk=None):
+        """Получение короткой ссылки на рецепт."""
+        self.get_object()
+        original_url = request.META.get('HTTP_REFERER')
+        print()
+        print(original_url)
+        print()
+        if original_url is None:
+            url = reverse('api:recipes-detail', kwargs={'pk': pk})
+            original_url = request.build_absolute_uri(url)
 
-        short_link = request.build_absolute_uri(
-            reverse('recipe_by_short_link', args=(recipe.short_link,))
+        short_link_instance, _ = RecipeShortLink.objects.get_or_create(
+            original_url=original_url,
+            defaults={'short_link': str(uuid.uuid4())[:3]}
+        )
+        serializer = ShortLinkSerializer(
+            short_link_instance,
+            context={'request': request},
         )
 
-        return JsonResponse({'short-link': short_link})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def recipe_by_short_link(self, request, short_link=None):
-        """View функция, для открытия информации о рецепте по короткой ссылке."""
-        recipe_id = get_object_or_404(
-            Recipe, short_link=short_link
-        ).id
-
-        url = reverse('api:recipes-detail', kwargs={'pk': recipe_id})
-        original_url = request.build_absolute_uri(url)
-
-        return redirect(original_url)
+    def retrieve_by_short_link(self, request, short_link=None):
+        """Получение рецепта по короткой ссылке."""
+        recipe = get_object_or_404(
+            RecipeShortLink, short_link=short_link
+        ).original_url
+        
+        # recipe_id = get_object_or_404(
+        #     RecipeShortLink, short_link=short_link
+        # ).id
+        # recipe = f'http://localhost/recipes/{recipe_id}'
+        #         #   'http://localhost/recipes/1'
+        return redirect(recipe)

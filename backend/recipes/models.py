@@ -1,8 +1,8 @@
+import uuid
+
 from django.db import models
 from users.models import CustomUser
 from django.core.validators import MinValueValidator
-
-import uuid
 
 
 class Ingredient(models.Model):
@@ -61,12 +61,6 @@ class Recipe(models.Model):
         ],
         verbose_name='Время приготовления'
     )
-    short_link = models.SlugField(unique=True, editable=False)
-
-    def save(self, *args, **kwargs):
-        if not self.short_link:
-            self.short_link = str(uuid.uuid4())[:8]  # генерируем короткую ссылку
-        super().save(*args, **kwargs)
 
     class Meta:
         default_related_name = 'recipes'
@@ -129,7 +123,6 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
-        # default_related_name = 'shoppingcart'
         constraints = [
             models.UniqueConstraint(
                 fields=('user', 'recipe'),
@@ -138,3 +131,25 @@ class ShoppingCart(models.Model):
         ]
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
+
+
+class RecipeShortLink(models.Model):
+    """Модель коротких ссылок"""
+
+    short_link = models.CharField(
+        max_length=3, unique=True, editable=False
+    )
+    original_url = models.CharField(max_length=256, unique=True)
+
+    class Meta:
+        verbose_name = 'Ссылка'
+        verbose_name_plural = 'Ссылки'
+
+    def __str__(self):
+        return f'{self.original_url} -> {self.short_link}'
+
+    def save(self, *args, **kwargs):
+        """Переопределяем метод для генерации short_link перед сохранением."""
+        if not self.short_link:
+            self.short_link = str(uuid.uuid4())[:3]
+        super().save(*args, **kwargs)
