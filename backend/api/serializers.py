@@ -264,14 +264,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ('id', 'name', 'image', 'cooking_time',)
-        # fields = ('id', 'recipe.name', 'recipe.image', 'recipe.cooking_time')
-
-    # def create(self, validated_data):
-    #     user = validated_data.pop('user')
-    #     recipe_id = validated_data.pop('recipe_id')
-    #     recipe = get_object_or_404(Recipe, id=recipe_id)
-    #     return FavoriteSerializer(recipe_id)
-    # # #     favorite = get_object_or_404(Favorite, user=validated_data)
 
 
 class UserRecipeSerializer(CustomUserSerializer):
