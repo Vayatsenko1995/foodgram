@@ -1,9 +1,16 @@
+"""Модуль админ зоны users."""
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 
-from .models import CustomUser
+from .models import AbstractUser, CustomUser
 
-# Register your models here.
-class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ["username", "last_name", "first_name", "email"]
 
-admin.site.register(CustomUser, CustomUserAdmin)
+@admin.register(AbstractUser)
+class UserAdmin(UserAdmin):
+    list_display = ('username', 'id', 'email', 'first_name', 'last_name')
+    list_filter = ('email', 'first_name')
+
+
+@admin.register(CustomUser)
+class SubscribeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'author')

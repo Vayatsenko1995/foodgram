@@ -1,3 +1,4 @@
+"""Модуль с моделями связанными с рецептами."""
 import uuid
 
 from django.db import models
@@ -78,11 +79,11 @@ class RecipeIngredient(models.Model):
     amount = models.FloatField()
 
     def __str__(self):
-        return f"{self.amount} {self.ingredient.unit} of {self.ingredient.name}"
+        return f"{self.amount} {self.ingredient.unit} \
+    of {self.ingredient.name}"
 
 
 class Favorite(models.Model):
-    """Модель Избранных рецептов."""
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
@@ -108,7 +109,6 @@ class Favorite(models.Model):
 
 
 class ShoppingCart(models.Model):
-    """Модель списка Покупок."""
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
@@ -134,8 +134,6 @@ class ShoppingCart(models.Model):
 
 
 class RecipeShortLink(models.Model):
-    """Модель коротких ссылок"""
-
     short_link = models.CharField(
         max_length=3, unique=True, editable=False
     )

@@ -1,3 +1,4 @@
+"""Модуль с основными views."""
 from datetime import datetime
 import uuid
 
@@ -33,6 +34,8 @@ from .utils import add_or_delete_model
 
 
 class CustomUserViewSet(UserViewSet):
+    """Кастомный ViewSet на основе djoser."""
+
     queryset = CustomUser.objects.all()
 
     @action(
@@ -67,7 +70,7 @@ class CustomUserViewSet(UserViewSet):
         """Удаление аватара пользователя."""
         user = request.user
         if user.avatar:
-            user.avatar.delete() 
+            user.avatar.delete()
             user.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(
@@ -153,6 +156,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Описание логики работы АПИ для эндпоинта Tag."""
+
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
@@ -161,6 +165,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Описание логики работы АПИ для эндпоинта Recipe."""
+
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
     filter_backends = (rest_filters.DjangoFilterBackend, filters.SearchFilter)
@@ -168,7 +173,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         """Получение сериализатора для работы с Рецептами."""
-
         if self.request.method == 'GET':
             return RecipeSerializer
         return RecipePostUpdateSerializer
@@ -176,7 +180,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         """Проверка доступа перед обновлением рецепта."""
         recipe = self.get_object()
-        # Проверяем, является ли пользователь автором рецепта
         if recipe.author != self.request.user:
             raise PermissionDenied(
                 "У вас нет прав для изменения этого рецепта."
@@ -200,9 +203,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_name='download',)
     def download_shopping_cart(self, request):
-        """
-        Подготавливает и возвращает файл со списком покупок.
-        """
+        """Подготавливает и возвращает файл со списком покупок."""
         user = request.user
 
         ingredients = (
@@ -276,10 +277,4 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(
             RecipeShortLink, short_link=short_link
         ).original_url
-        
-        # recipe_id = get_object_or_404(
-        #     RecipeShortLink, short_link=short_link
-        # ).id
-        # recipe = f'http://localhost/recipes/{recipe_id}'
-        #         #   'http://localhost/recipes/1'
         return redirect(recipe)

@@ -1,3 +1,4 @@
+"""Модуль дополнительными утилитами."""
 import base64
 
 from django.core.files.base import ContentFile
@@ -8,7 +9,10 @@ from rest_framework import status
 
 from recipes.models import Recipe
 
+
 class Base64ImageField(serializers.ImageField):
+    """Сериализатор для обработки передамаваемых  изображений."""
+
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
@@ -20,6 +24,7 @@ class Base64ImageField(serializers.ImageField):
 
 
 def add_or_delete_model(request, model, serializer, pk=None):
+    """Вспомогательная функция для обавление или удаление модели."""
     recipe = get_object_or_404(Recipe, pk=pk)
     if request.method == 'POST':
         serializer = serializer(data={

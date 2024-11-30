@@ -1,3 +1,4 @@
+"""Модуль с URL путями отвечающими за сайт и api."""
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static

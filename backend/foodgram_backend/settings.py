@@ -28,7 +28,6 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-a+@loful*ep2biz)u3+si4_%b=
 DEBUG = os.getenv('DEBUG_MODE', )
 
 ALLOWED_HOSTS = [os.getenv('HOSTS'),]
-# ALLOWED_HOSTS = ['foodgram1995.zapto.org', ]
 
 
 # Application definition
