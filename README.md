@@ -141,6 +141,3 @@ location / {
 
 bash
 sudo service nginx reload
-
-
-```
