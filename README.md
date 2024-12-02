@@ -141,3 +141,5 @@ location / {
 
 bash
 sudo service nginx reload
+
+Для ревьюера адрес сервера: https://foodgram1995.zapto.org/
