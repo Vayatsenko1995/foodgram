@@ -27,8 +27,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-a+@loful*ep2biz)u3+si4_%b=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG_MODE', )
 
-ALLOWED_HOSTS = [os.getenv('HOSTS'),]
-
+# ALLOWED_HOSTS = [os.getenv('HOSTS'),]
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -166,5 +166,5 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 5,
 }

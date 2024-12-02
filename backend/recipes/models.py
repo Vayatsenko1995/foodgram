@@ -42,7 +42,7 @@ class Recipe(models.Model):
         related_name='recipes',
         verbose_name='Автор'
     )
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=256, verbose_name='Название')
     image = models.ImageField(
         upload_to='recipe/images/',
         null=False,
@@ -62,6 +62,10 @@ class Recipe(models.Model):
         ],
         verbose_name='Время приготовления'
     )
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата добавления',
+    )
 
     class Meta:
         default_related_name = 'recipes'
@@ -77,6 +81,10 @@ class RecipeIngredient(models.Model):
         Ingredient, on_delete=models.CASCADE, related_name='recipeingredients'
     )
     amount = models.FloatField()
+
+    class Meta:
+        verbose_name = 'Ингридиент в рецепте'
+        verbose_name_plural = 'Ингридиенты в рецепте'
 
     def __str__(self):
         return f"{self.amount} {self.ingredient.unit} \

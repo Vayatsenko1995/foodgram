@@ -5,7 +5,8 @@ from django.contrib.admin import display
 from .models import (
     Favorite, Ingredient,
     RecipeIngredient, Recipe,
-    ShoppingCart, Tag
+    ShoppingCart, Tag,
+    RecipeShortLink
 )
 
 
@@ -13,7 +14,8 @@ from .models import (
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'id', 'author', 'added_in_favorites')
     readonly_fields = ('added_in_favorites',)
-    list_filter = ('author', 'name', 'tags')
+    list_filter = ('tags',)
+    search_fields = ('author__email', 'name')
 
     @display(description='Количество в избранных')
     def added_in_favorites(self, obj):
@@ -23,12 +25,11 @@ class RecipeAdmin(admin.ModelAdmin):
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit')
-    list_filter = ('name',)
-
+    search_fields = ('name',)
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('name', 'color', 'slug')
+    list_display = ('name', 'slug')
 
 
 @admin.register(ShoppingCart)
@@ -37,10 +38,15 @@ class ShoppingCartAdmin(admin.ModelAdmin):
 
 
 @admin.register(Favorite)
-class FavouriteAdmin(admin.ModelAdmin):
+class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe')
 
 
 @admin.register(RecipeIngredient)
-class IngredientInRecipeAdmin(admin.ModelAdmin):
+class RecipeIngredientAdmin(admin.ModelAdmin):
     list_display = ('recipe', 'ingredient', 'amount')
+
+
+@admin.register(RecipeShortLink)
+class RecipeShortLinkAdmin(admin.ModelAdmin):
+    list_display = ('short_link', 'original_url')

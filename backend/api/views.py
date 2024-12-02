@@ -20,6 +20,7 @@ from recipes.models import (
     Ingredient, Tag, Recipe, ShoppingCart, Favorite, RecipeIngredient,
     RecipeShortLink
 )
+from .paginations import LimitPageNumberPaginator
 from .serializers import (
     RecipeSerializer, ShortLinkSerializer,
     RecipePostUpdateSerializer,
@@ -37,6 +38,7 @@ class CustomUserViewSet(UserViewSet):
     """Кастомный ViewSet на основе djoser."""
 
     queryset = CustomUser.objects.all()
+    pagination_class = LimitPageNumberPaginator
 
     @action(
         methods=['get'],
@@ -166,8 +168,9 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     """Описание логики работы АПИ для эндпоинта Recipe."""
 
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.all().order_by('-pub_date')
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
+    pagination_class = LimitPageNumberPaginator
     filter_backends = (rest_filters.DjangoFilterBackend, filters.SearchFilter)
     filterset_class = RecipeFilter
 
