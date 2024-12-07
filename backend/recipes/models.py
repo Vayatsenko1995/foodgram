@@ -7,8 +7,15 @@ from django.core.validators import MinValueValidator
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=64, unique=True)
-    measurement_unit = models.CharField(max_length=16)
+    name = models.CharField(
+        max_length=64,
+        unique=True,
+        verbose_name='Название'
+    )
+    measurement_unit = models.CharField(
+        max_length=16,
+        verbose_name='Единица измерения'
+    )
 
     class Meta:
         verbose_name = 'Ингридиент'
@@ -72,15 +79,24 @@ class Recipe(models.Model):
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 
+    def __str__(self):
+        return self.name
+
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, related_name='recipeingredients'
+        Recipe, on_delete=models.CASCADE,
+        related_name='recipeingredients',
+        verbose_name = 'Рецепт'
     )
     ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE, related_name='recipeingredients'
+        Ingredient, on_delete=models.CASCADE,
+        related_name='recipeingredients',
+        verbose_name='Ингридиент'
     )
-    amount = models.FloatField()
+    amount = models.FloatField(
+        verbose_name='Количество'
+    )
 
     class Meta:
         verbose_name = 'Ингридиент в рецепте'
@@ -89,6 +105,11 @@ class RecipeIngredient(models.Model):
     def __str__(self):
         return f"{self.amount} {self.ingredient.unit} \
     of {self.ingredient.name}"
+
+    def get_amount_with_unit(self):
+        return f"{self.amount} {self.ingredient.measurement_unit}"
+
+    get_amount_with_unit.short_description = 'Количество'
 
 
 class Favorite(models.Model):
@@ -143,9 +164,13 @@ class ShoppingCart(models.Model):
 
 class RecipeShortLink(models.Model):
     short_link = models.CharField(
-        max_length=3, unique=True, editable=False
+        max_length=3, unique=True, editable=False,
+        verbose_name='Короткая ссылка'
     )
-    original_url = models.CharField(max_length=256, unique=True)
+    original_url = models.CharField(
+        max_length=256, unique=True,
+        verbose_name='Оригинальная ссылка'
+    )
 
     class Meta:
         verbose_name = 'Ссылка'
