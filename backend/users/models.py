@@ -12,6 +12,7 @@ class CustomUser(AbstractUser):
     last_name = models.CharField(
         max_length=150,
     )
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = (
         'username',
@@ -28,6 +29,10 @@ class CustomUser(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+        ordering = ['last_name', 'first_name']
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name} ({self.email})'
 
 
 class Follow(models.Model):

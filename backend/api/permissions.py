@@ -9,18 +9,21 @@ class IsAuthorOrAdminOrReadOnly(BasePermission):
     Только для Администратора или Автора или на чтение
     для неавторизованных пользователей.
     """
+    message = 'У вас недостаточно прав для выполнения этого действия.'
 
     def has_permission(self, request, view):
-
         return (
             request.method in SAFE_METHODS or request.user.is_authenticated
         )
 
     def has_object_permission(self, request, view, obj):
-
-        if request.method in SAFE_METHODS:
-            return True
-        return request.user.is_authenticated and (
-            request.user.is_superuser
-            or obj.author == request.user
+        return (
+            request.method in SAFE_METHODS
+            or (
+                request.user.is_authenticated
+                and (
+                    request.user.is_superuser
+                    or obj.author == request.user
+                )
+            )
         )

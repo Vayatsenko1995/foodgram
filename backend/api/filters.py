@@ -1,8 +1,9 @@
 """Модуль кастомных фильтров для проекта."""
 from django_filters.rest_framework import FilterSet, filters
-from rest_framework.pagination import PageNumberPagination
 
-from recipes.models import Ingredient, Recipe, Tag
+from recipes.models import (
+    Recipe, Tag,
+)
 
 
 class RecipeFilter(FilterSet):
@@ -34,20 +35,3 @@ class RecipeFilter(FilterSet):
         if self.request.user.is_authenticated and value:
             return queryset.filter(shopping_cart__user=self.request.user)
         return queryset
-
-
-class IngredientFilter(FilterSet):
-    """Фильтр для вьюсета выбора Ингредиентов."""
-
-    name = filters.CharFilter(lookup_expr='istartswith')
-
-    class Meta:
-        model = Ingredient
-        fields = ('name',)
-
-
-class CustomLimitPagination(PageNumberPagination):
-    """Кастомная пагинация для получения опеределенного количества объектов."""
-
-    page_size_query_param = 'limit'
-    max_page_size = 100
