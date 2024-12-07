@@ -1,5 +1,4 @@
 """Модуль с сериализаторами проекта."""
-from django.core.validators import MinValueValidator
 from rest_framework import exceptions, serializers
 from rest_framework.reverse import reverse
 from djoser.serializers import UserSerializer
@@ -126,6 +125,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Favorite и ShoppingCart."""
+
     name = serializers.CharField(source='recipe.name', read_only=True)
     image = serializers.ImageField(source='recipe.image', read_only=True)
     cooking_time = serializers.IntegerField(
@@ -183,8 +183,9 @@ class RecipePostUpdateSerializer(serializers.ModelSerializer):
                 'Ингредиенты не должны повторяться!'
             )
 
-        # Убедимся, что все указанные ингредиенты существуют
-        if not Ingredient.objects.filter(id__in=ingredient_ids).count() == len(ingredient_ids):
+        if not Ingredient.objects.filter(
+            id__in=ingredient_ids
+        ).count() == len(ingredient_ids):
             raise serializers.ValidationError(
                 'Некоторые ингредиенты не найдены в базе данных'
             )
@@ -249,6 +250,7 @@ class RecipePostUpdateSerializer(serializers.ModelSerializer):
 
 class ShoppingCartSerializer(ShortRecipeSerializer):
     """Сериализатор карты покупок."""
+
     class Meta:
         model = ShoppingCart
         fields = ('id', 'name', 'image', 'cooking_time',)
@@ -267,6 +269,7 @@ class ShoppingCartSerializer(ShortRecipeSerializer):
 
 class FavoriteSerializer(ShortRecipeSerializer):
     """Сериализатор Избранного на сайте."""
+
     class Meta:
         model = Favorite
         fields = ('id', 'name', 'image', 'cooking_time',)
