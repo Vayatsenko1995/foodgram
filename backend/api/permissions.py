@@ -9,6 +9,7 @@ class IsAuthorOrAdminOrReadOnly(BasePermission):
     Только для Администратора или Автора или на чтение
     для неавторизованных пользователей.
     """
+
     message = 'У вас недостаточно прав для выполнения этого действия.'
 
     def has_permission(self, request, view):
