@@ -61,8 +61,7 @@ class CustomUserViewSet(UserViewSet):
     def avatar(self, request, *args, **kwargs):
         """Добавление-обновление аватара пользователя."""
         user = request.user
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(user, data=request.data)
+        serializer = self.get_serializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -74,11 +73,7 @@ class CustomUserViewSet(UserViewSet):
         if user.avatar:
             user.avatar.delete()
             user.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            {'detail': 'Аватар отсутствует.'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
@@ -93,8 +88,7 @@ class CustomUserViewSet(UserViewSet):
         ).prefetch_related('following').order_by('id')
         page = self.paginate_queryset(following)
         if page is not None:
-            serializer_class = self.get_serializer_class()
-            serializer = serializer_class(
+            serializer = self.get_serializer(
                 instance=page,
                 context={'request': request},
                 many=True
@@ -108,18 +102,16 @@ class CustomUserViewSet(UserViewSet):
     def post_subscribe(self, request, id=None):
         """Подписка на автора."""
         following = get_object_or_404(CustomUser, pk=id)
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(
-            data={'following': following},
+        serializer = self.get_serializer(
+            data={
+                'user': request.user.id,
+                'following': following.id
+            },
             context={'request': request},
         )
-        if serializer.is_valid():
-            serializer.save(
-                user=request.user,
-                following=following,
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @post_subscribe.mapping.delete
     def delete_subscribe(self, request, id=None):
@@ -163,17 +155,25 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     """Описание логики работы АПИ для эндпоинта Recipe."""
 
+    queryset = Recipe.objects.all()
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
     pagination_class = LimitPageNumberPaginator
     filter_backends = (rest_filters.DjangoFilterBackend, filters.SearchFilter)
     filterset_class = RecipeFilter
 
     def get_queryset(self):
-        return Recipe.objects.all().order_by('-pub_date')
+        # C queryset не очень понял, надеюсь я всё таки верный вывод
+        return self.queryset.select_related('author').prefetch_related(
+            'ingredients', 'tags'
+        ).order_by('-pub_date')
 
     def get_serializer_class(self):
         """Получение сериализатора для работы с Рецептами."""
-        if self.action in ['list', 'retrieve']:
+        if self.action == 'favorite':
+            return FavoriteSerializer
+        elif self.action == 'shopping_cart':
+            return ShoppingCartSerializer
+        elif self.action in ['list', 'retrieve']:
             return RecipeSerializer
         return RecipePostUpdateSerializer
 
@@ -183,18 +183,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, pk=pk)
         serializer = serializer(
             data={
-                'recipe': recipe.id,
+                'recipe': pk,
                 'user': request.user.id,
             },
             context={'request': request}
         )
-        if not serializer.is_valid() or model.objects.filter(
-            user=request.user,
-            recipe=recipe
-        ):
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user, recipe=recipe,)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -206,12 +200,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
             user=request.user,
             recipe=recipe
         )
-        if not data.exists():
+        deleted_count, _ = data.delete()
+        if not deleted_count:
             return Response(
                 {'error': 'Рецепт в списке не найден'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        data.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def perform_create(self, serializer):
@@ -226,8 +220,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def shopping_cart(self, request, pk=None):
         model_name = ShoppingCart
-        serializer_name = ShoppingCartSerializer
-        return self.add_model(model_name, serializer_name, pk)
+        return self.add_model(model_name, self.get_serializer, pk)
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk=None):
@@ -276,9 +269,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthorOrAdminOrReadOnly,)
     )
     def favorite(self, request, pk=None):
-        serializer_name = FavoriteSerializer
         model_name = Favorite
-        return self.add_model(model_name, serializer_name, pk)
+        return self.add_model(model_name, self.get_serializer, pk)
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk=None):

@@ -20,7 +20,6 @@ class CustomUser(AbstractUser):
         'username',
         'last_name',
         'first_name',
-        'password',
     )
     avatar = models.ImageField(
         upload_to='users/image/',

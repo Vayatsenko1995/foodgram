@@ -1,7 +1,6 @@
 """Модуль с кастомными пагинациями проекта."""
 from rest_framework.pagination import PageNumberPagination
-
-PAGE_SIZE = 10
+from foodgram_backend.settings import PAGE_SIZE
 
 
 class LimitPageNumberPaginator(PageNumberPagination):
